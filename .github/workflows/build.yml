@@ -60,6 +60,10 @@ jobs:
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
 
+      # Verify the JAR file exists
+      - name: Verify JAR File
+        run: ls -lh target/
+
       # Build Docker image from Dockerfile
       - name: Build Docker image
         run: |
