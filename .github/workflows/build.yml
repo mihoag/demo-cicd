@@ -98,8 +98,10 @@ jobs:
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}  # Use the secret API key
         run: |
-          curl -X POST https://api.render.com/v1/services/srv-ct5afg9u0jms73acse6g/deployments \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -F "file=@target/data-0.0.1-SNAPSHOT.jar" \
-            -F "branch=main" \
-            -F "commit=${{ github.sha }}"
+          for i in {1..5}; do
+           curl --http1.1 -X POST https://api.render.com/v1/services/srv-ct5afg9u0jms73acse6g/deployments \
+             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+             -F "file=@target/data-0.0.1-SNAPSHOT.jar" \
+             -F "branch=main" \
+             -F "commit=${{ github.sha }}" && break || sleep 15;
+          done
