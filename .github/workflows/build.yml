@@ -73,10 +73,17 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v1
+
       - name: Install Render CLI
         run: |
+          # Install Render CLI
           curl -fsSL https://render.com/static/cli/install.sh | bash
-          echo 'export PATH="$PATH:$HOME/.render"' >> $GITHUB_ENV
+          # Add the Render CLI to the PATH
+          echo "$HOME/.render/bin" >> $GITHUB_PATH
+
+      - name: Verify Render CLI Installation
+        run: render --version  # Verify that the Render CLI is installed and working
+
       - name: Deploy to Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}  # Use GitHub secret for Render API key
