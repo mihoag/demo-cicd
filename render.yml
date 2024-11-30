@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: demo-ci-cd  # Service name (change to your app name)
+    env: java              # Set the environment to Java
+    buildCommand: ""       # Leave empty if you're deploying the pre-built JAR (handled in GitHub Actions)
+    startCommand: java -jar target/data-0.0.1-SNAPSHOT.jar  # Command to start the app
+    plan: free              # Render plan (adjust to your needs, e.g., starter, pro)
+    branch: main            # Branch to deploy from (use your main branch)
+    autoDeploy: true        # Automatically deploy when changes are pushed to GitHub
