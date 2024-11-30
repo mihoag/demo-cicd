@@ -60,12 +60,17 @@ jobs:
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
 
-      # Upload artifact (JAR file)
-      - name: Upload JAR
+      # Build Docker image from Dockerfile
+      - name: Build Docker image
+        run: |
+          docker build -t my-app .
+
+      # Upload the Docker image as an artifact (optional)
+      - name: Upload Docker image
         uses: actions/upload-artifact@v3
         with:
-          name: jar-artifact
-          path: target/data-0.0.1-SNAPSHOT.jar
+          name: docker-image
+          path: ./my-app
 
   # Deploy job
   deploy:
@@ -73,35 +78,34 @@ jobs:
     name: Deploy to Render
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository again (required in the deploy job)
-      - name: Check out the repository
-        uses: actions/checkout@v2
+      # Checkout code
+      - name: Check out the code
+        uses: actions/checkout@v3
 
-      # Download the JAR file artifact from the build job
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: jar-artifact
-          path: target  # This will download the JAR into the target directory
-
-      # Install Render CLI and dependencies
-      - name: Install Node.js and Render CLI
+      # Build the Docker image
+      - name: Build Docker image
         run: |
-          curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-          npm install -g render-cli
+          docker build -t my-app .
 
-      # Verify Render CLI installation
-      - name: Verify Render CLI Installation
-        run: render --version
-
-      # Deploy to Render using the JAR file
-      - name: Deploy to Render using API
+      # Authenticate with Render Docker Registry
+      - name: Log in to Render Docker Registry
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}  # Use the secret API key
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          echo ${{ secrets.RENDER_API_KEY }} | docker login docker.render.com -u render --password-stdin
+
+      # Push the Docker image to Render
+      - name: Push Docker image
+        run: |
+          docker tag my-app docker.render.com/my-app:latest
+          docker push docker.render.com/my-app:latest
+
+      # Trigger Render deployment
+      - name: Trigger Render deployment
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
           curl -X POST https://api.render.com/v1/services/srv-ct5afg9u0jms73acse6g/deployments \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -F "file=@target/data-0.0.1-SNAPSHOT.jar" \
             -F "branch=main" \
             -F "commit=${{ github.sha }}"
