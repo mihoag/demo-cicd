@@ -66,8 +66,7 @@ jobs:
 
       # Build Docker image from Dockerfile
       - name: Build Docker image
-        run: |
-          docker build -t my-app .
+        run: docker build -t my-app .
 
       # Upload the Docker image as an artifact (optional)
       - name: Upload Docker image
