@@ -77,13 +77,12 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
-      # Install Render CLI and dependencies
+      # Install Render CLI
       - name: Install Node.js and Render CLI
         run: |
           # Install Node.js 20 (LTS) - the recommended version
           curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
           sudo apt-get install -y nodejs
-
           # Install Render CLI using npm
           npm install -g render-cli
 
@@ -91,11 +90,14 @@ jobs:
       - name: Verify Render CLI Installation
         run: render --version
 
-      # Deploy to Render using the JAR file
-      - name: Deploy to Render
+      # Deploy to Render using the Render API
+      - name: Deploy to Render via API
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}  # Use GitHub secret for Render API key
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}  # GitHub secret for Render API Key
         run: |
-          # Deploy the built JAR to Render using Render CLI
-          JAR_FILE=target/data-0.0.1-SNAPSHOT.jar
-          render deploy --service demo-ci-cd --branch main --commit ${{ github.sha }} --file $JAR_FILE --engine none
+          # Deploy the built JAR to Render using API
+          curl -X POST https://api.render.com/v1/services/srv-ct5afg9u0jms73acse6g/deployments \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -F "file=@target/data-0.0.1-SNAPSHOT.jar" \
+            -F "branch=main" \
+            -F "commit=${{ github.sha }}"
