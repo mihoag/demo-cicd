@@ -83,8 +83,6 @@ jobs:
         with:
           name: jar-artifact
           path: target  # This will download the JAR into the target directory
-      - name: Verify JAR File
-        run: ls -lh target/
       # Install Render CLI and dependencies
       - name: Install Node.js and Render CLI
         run: |
