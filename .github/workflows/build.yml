@@ -1,65 +1,70 @@
 name: CI/CD Pipeline
-
 on:
-  # Manually trigger workflow runs
+  #Manually trigger workflow runs
   workflow_dispatch:
-  # Trigger the workflow on push from the main branch
+  #Trigger the workflow on push from the main branch
   push:
     branches:
       - main
-
 jobs:
-  # Test job
+  #Test's job
   tests:
     name: Unit tests
+    #Run on Ubuntu using the latest version
     runs-on: ubuntu-latest
+    #Job's steps
     steps:
-      # Check-out your repository
-      - uses: actions/checkout@v2
-      # Set up JDK 17
+      #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
+      - uses: actions/checkout@v1
+      #Set up JDK 11
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v1
         with:
           java-version: '17'
-      # Cache Maven dependencies
+      #Set up Maven cache
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        #This action allows caching dependencies and build outputs to improve workflow execution time.
+        uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      # Run tests using Maven
+      #Run Tests
       - name: Run Tests
         run: mvn -B test
-
-  # Build job
+  #Build's job
   build:
-    needs: tests  # Run after tests pass
+    needs: tests
     name: Build
+    #Run on Ubuntu using the latest version
     runs-on: ubuntu-latest
     steps:
-      # Check-out your repository
-      - uses: actions/checkout@v2
-      # Set up JDK 17
+      #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
+      - uses: actions/checkout@v1
+      #Set up JDK 11
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v1
         with:
           java-version: '17'
-      # Cache Maven dependencies
+      #Set up Maven cache
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        #This action allows caching dependencies and build outputs to improve workflow execution time.
+        uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      # Build the application using Maven
+      #Build the application using Maven
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
-      # Upload JAR file as an artifact
+      #Build the application using Maven
       - name: Upload JAR
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
         uses: actions/upload-artifact@v3
         with:
-          name: spring-boot-artifact
+          #Set artifact name
+          name: artifact
+          #From this path
           path: target/data-0.0.1-SNAPSHOT.jar
 
   # Deploy job
@@ -93,4 +98,4 @@ jobs:
         run: |
           # Deploy the built JAR to Render using Render CLI
           JAR_FILE=target/data-0.0.1-SNAPSHOT.jar
-          render deploy --service demo-cicd --branch main --commit ${{ github.sha }} --file $JAR_FILE
+          render deploy --service your-render-service-name --branch main --commit ${{ github.sha }} --file $JAR_FILE
