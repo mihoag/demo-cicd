@@ -1,109 +1,77 @@
 name: CI/CD Pipeline
 
 on:
-  # Trigger on push to the main branch
   push:
     branches:
       - main
 
 jobs:
-  # Test job
   tests:
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
-      # Checkout code
       - uses: actions/checkout@v1
-
-      # Set up JDK
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: '17'
-
-      # Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
-      # Run tests
       - name: Run Tests
         run: mvn -B test
 
-  # Build job
   build:
     needs: tests
     name: Build
     runs-on: ubuntu-latest
     steps:
-      # Checkout code
       - uses: actions/checkout@v1
-
-      # Set up JDK
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: '17'
-
-      # Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
-      # Build the project with Maven
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
-
-      # Verify the JAR file exists
       - name: Verify JAR File
         run: ls -lh target/
-
-      # Build Docker image from Dockerfile
-      - name: Build Docker image
-        run: docker build -t my-app .
-
-      # Upload the Docker image as an artifact (optional)
-      - name: Upload Docker image
+      - name: Upload JAR File
         uses: actions/upload-artifact@v3
         with:
-          name: docker-image
-          path: ./my-app
+          name: jar-file
+          path: target/data-0.0.1-SNAPSHOT.jar
 
-  # Deploy job
   deploy:
-    needs: build  # Ensure build is done before deployment
+    needs: build
     name: Deploy to Render
     runs-on: ubuntu-latest
     steps:
-      # Checkout code
       - name: Check out the code
         uses: actions/checkout@v3
-
-      # Build the Docker image
+      - name: Download JAR File
+        uses: actions/download-artifact@v3
+        with:
+          name: jar-file
+          path: target/
       - name: Build Docker image
-        run: |
-          docker build -t my-app .
-
-      # Authenticate with Render Docker Registry
+        run: docker build -t my-app .
       - name: Log in to Render Docker Registry
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: |
-          echo ${{ secrets.RENDER_API_KEY }} | docker login docker.render.com -u render --password-stdin
-
-      # Push the Docker image to Render
+        run: echo ${{ secrets.RENDER_API_KEY }} | docker login docker.render.com -u render --password-stdin
       - name: Push Docker image
         run: |
           docker tag my-app docker.render.com/my-app:latest
           docker push docker.render.com/my-app:latest
-
-      # Trigger Render deployment
       - name: Trigger Render deployment
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
