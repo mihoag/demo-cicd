@@ -67,11 +67,11 @@ jobs:
       - name: Log in to Render Docker Registry
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: echo ${{ secrets.RENDER_API_KEY }} | docker login registry.render.com -u render --password-stdin
+        run: echo ${{ secrets.RENDER_API_KEY }} | docker login registry.render.com/demo-cicd -u render --password-stdin
       - name: Push Docker image
         run: |
-          docker tag my-app registry.render.com/my-app:latest
-          docker push registry.render.com/my-app:latest
+          docker tag my-app registry.render.com/demo-cicd:latest
+          docker push registry.render.com/demo-cicd:latest
       - name: Trigger Render deployment
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
