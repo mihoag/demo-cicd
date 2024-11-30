@@ -27,5 +27,11 @@ class DataControllerTest {
         Integer nationsLength = dataController.getRandomNations().size();
         assertEquals(10, nationsLength);
     }
-    
+
+    @Test
+    void currenciesLength() {
+        Integer currenciesLength = dataController.getRandomCurrencies().size();
+        assertEquals(19, currenciesLength);
+    }
+
 }
