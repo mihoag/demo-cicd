@@ -74,14 +74,14 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v1
 
-      - name: Install Node.js and Render CLI
+      - name: Install Node.js 20 and Render CLI
         run: |
-          # Install Node.js (if not installed already)
-          curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          # Install Node.js 20 (LTS) - the recommended version
+          curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
           sudo apt-get install -y nodejs
 
           # Install Render CLI using npm
-          npm install -g @render/render-cli
+          npm install -g render-cli  # Update to the correct package name
 
       - name: Verify Render CLI Installation
         run: render --version  # Verify that the Render CLI is installed and working
@@ -93,4 +93,5 @@ jobs:
           # Assuming the built JAR is located in the target directory
           JAR_FILE=target/data-0.0.1-SNAPSHOT.jar
           render deploy --service demo-ci-cd --branch main --commit ${{ github.sha }} --file $JAR_FILE
+  
   
