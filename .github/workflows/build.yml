@@ -74,12 +74,14 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v1
 
-      - name: Install Render CLI
+      - name: Install Node.js and Render CLI
         run: |
-          # Install Render CLI
-          curl -fsSL https://render.com/static/cli/install.sh | bash
-          # Add the Render CLI to the PATH
-          echo "$HOME/.render/bin" >> $GITHUB_PATH
+          # Install Node.js (if not installed already)
+          curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+
+          # Install Render CLI using npm
+          npm install -g @render/render-cli
 
       - name: Verify Render CLI Installation
         run: render --version  # Verify that the Render CLI is installed and working
@@ -91,3 +93,4 @@ jobs:
           # Assuming the built JAR is located in the target directory
           JAR_FILE=target/data-0.0.1-SNAPSHOT.jar
           render deploy --service demo-ci-cd --branch main --commit ${{ github.sha }} --file $JAR_FILE
+  
