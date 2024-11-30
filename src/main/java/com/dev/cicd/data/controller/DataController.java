@@ -37,19 +37,18 @@ public class DataController {
                 return nations;
         }
 
-        @GetMapping("/currencies")
-        public JsonNode getRandomCurrencies() {
-                var objectMapper = new ObjectMapper();
-                var faker = new Faker(new Locale("en-US"));
-                var currencies = objectMapper.createArrayNode();
-                for (var i = 0; i < 20; i++) {
-                        var currency = faker.currency();
-                        currencies.add(objectMapper.createObjectNode()
-                                .put("name", currency.name())
-                                .put("code", currency.code()));
-                }
-                return currencies;
-
-        }
+//        @GetMapping("/currencies")
+//        public JsonNode getRandomCurrencies() {
+//                var objectMapper = new ObjectMapper();
+//                var faker = new Faker(new Locale("en-US"));
+//                var currencies = objectMapper.createArrayNode();
+//                for (var i = 0; i < 20; i++) {
+//                        var currency = faker.currency();
+//                        currencies.add(objectMapper.createObjectNode()
+//                                .put("name", currency.name())
+//                                .put("code", currency.code()));
+//                }
+//                return currencies;
+//        }
 
 }
