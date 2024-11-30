@@ -1,82 +1,106 @@
 name: CI/CD Pipeline
 
 on:
+  # Trigger on push to the main branch
   push:
     branches:
       - main
 
 jobs:
+  # Test job
   tests:
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
+      # Checkout code
       - uses: actions/checkout@v1
+
+      # Set up JDK
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: '17'
+
+      # Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      # Run tests
       - name: Run Tests
         run: mvn -B test
 
+  # Build job
   build:
     needs: tests
     name: Build
     runs-on: ubuntu-latest
     steps:
+      # Checkout code
       - uses: actions/checkout@v1
+
+      # Set up JDK
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: '17'
+
+      # Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      # Build the project with Maven
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
-      - name: Verify JAR File
-        run: ls -lh target/
-      - name: Upload JAR File
+
+      # Upload artifact (JAR file)
+      - name: Upload JAR
         uses: actions/upload-artifact@v3
         with:
-          name: jar-file
+          name: jar-artifact
           path: target/data-0.0.1-SNAPSHOT.jar
 
+  # Deploy job
   deploy:
-    needs: build
+    needs: build  # Ensure build is done before deployment
     name: Deploy to Render
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the code
-        uses: actions/checkout@v3
-      - name: Download JAR File
+      # Checkout the repository again (required in the deploy job)
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      # Download the JAR file artifact from the build job
+      - name: Download JAR artifact
         uses: actions/download-artifact@v3
         with:
-          name: jar-file
-          path: target/
-      - name: Build Docker image
-        run: docker build -t my-app .
-      - name: Log in to Render Docker Registry
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: echo ${{ secrets.RENDER_API_KEY }} | docker login registry.render.com/demo-cicd -u render --password-stdin
-      - name: Push Docker image
+          name: jar-artifact
+          path: target  # This will download the JAR into the target directory
+
+      # Install Render CLI and dependencies
+      - name: Install Node.js and Render CLI
         run: |
-          docker tag my-app registry.render.com/demo-cicd:latest
-          docker push registry.render.com/demo-cicd:latest
-      - name: Trigger Render deployment
+          curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          npm install -g render-cli
+      # Verify Render CLI installation
+      - name: Verify Render CLI Installation
+        run: render --version
+
+      # Deploy to Render using the JAR file
+      - name: Deploy to Render using API
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}  # Use the secret API key
         run: |
           curl -X POST https://api.render.com/v1/services/srv-ct5afg9u0jms73acse6g/deployments \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -F "file=@target/data-0.0.1-SNAPSHOT.jar" \
             -F "branch=main" \
             -F "commit=${{ github.sha }}"
