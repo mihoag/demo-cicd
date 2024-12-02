@@ -1,16 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.dev.cicd.data.DataApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.583 s <<< FAILURE! - in com.dev.cicd.data.DataApplicationTests
-applicationContextTest  Time elapsed: 1.582 s  <<< ERROR!
-org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 5000 is already in use
-	at com.dev.cicd.data.DataApplicationTests.applicationContextTest(DataApplicationTests.java:16)
-Caused by: org.springframework.boot.web.server.PortInUseException: Port 5000 is already in use
-	at com.dev.cicd.data.DataApplicationTests.applicationContextTest(DataApplicationTests.java:16)
-Caused by: java.lang.IllegalArgumentException: standardService.connector.startFailed
-	at com.dev.cicd.data.DataApplicationTests.applicationContextTest(DataApplicationTests.java:16)
-Caused by: org.apache.catalina.LifecycleException: Protocol handler start failed
-	at com.dev.cicd.data.DataApplicationTests.applicationContextTest(DataApplicationTests.java:16)
-Caused by: java.net.BindException: Address already in use: bind
-	at com.dev.cicd.data.DataApplicationTests.applicationContextTest(DataApplicationTests.java:16)
-
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.678 s - in com.dev.cicd.data.DataApplicationTests
