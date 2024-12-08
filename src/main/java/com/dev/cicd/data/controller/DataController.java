@@ -45,7 +45,7 @@ public class DataController {
                 for (var i = 0; i < 20; i++) {
                         var currency = faker.currency();
                         currencies.add(objectMapper.createObjectNode()
-                                .put("name", currency.name())
+                               .put("name", currency.name())
                                 .put("code", currency.code()));
                 }
                 return currencies;
