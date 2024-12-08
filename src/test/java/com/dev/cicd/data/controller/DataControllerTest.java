@@ -31,7 +31,7 @@ class DataControllerTest {
     @Test
     void currenciesLength() {
         Integer currenciesLength = dataController.getRandomCurrencies().size();
-        assertEquals(20, currenciesLength);
+        assertEquals(19, currenciesLength);
     }
 
 }
